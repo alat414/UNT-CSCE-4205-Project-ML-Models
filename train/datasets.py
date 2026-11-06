@@ -8,27 +8,27 @@ from sklearn.metrics import accuracy_score, classification_report
 
 # Path Setup
 
-currentFolder = Path(__file__).parent 
-mainFolder = currentFolder.parent
-testFolder = mainFolder / "test"
+currentFolder = Path(__file__).parent #train folder
+mainFolder = currentFolder.parent #Root folder (UCI Dataset)
+testFolder = mainFolder / "test" #test folder
 
 # Function Definitions
 
 def load_data(dataFolder, mainFolder, feature_names, label_map):
     # Load x data
-    XData = pd.read_csv(testFolder/ f"X_test.txt", sep=r"\s+", header=None)
+    XData = pd.read_csv(dataFolder/ f"X_{dataFolder.name}.txt", sep=r"\s+", header=None)
     XData.columns = feature_names
 
     #Load y data
-    YRaw = pd.read_csv(testFolder/ f"y_test.txt", sep=r"\s+", header=None).values.ravel()
-    subject = pd.read_csv(testFolder/ f"subject_train.txt", sep=r"\s+", header=None).values.ravel()
+    YRaw = pd.read_csv(testFolder/ f"y_{dataFolder.name}.txt", sep=r"\s+", header=None).values.ravel()
+    subject = pd.read_csv(testFolder/ f"subject_{dataFolder.name}.txt", sep=r"\s+", header=None).values.ravel()
 
     # Map Labels
     yLabels = pd.Series(YRaw).map(label_map)
 
     # Add to dataframe for tracking purposes
     XData['Subject'] = subject
-    XData['Activity'] = YRaw
+    XData['Activity'] = yLabels
 
     return XData
 
@@ -62,6 +62,8 @@ print("Loading training data")
 test_dataframe = load_data(testFolder, mainFolder, unique_names, label_to_activity)
 
 # Separate Features and Labels
+X_train = train_dataframe.drop(columns=['Subject', 'Activity'])
+y_train = train_dataframe['Activity']
 
 # Display only engineered features
 X_test = test_dataframe.drop(columns=['Subject', 'Activity'])
@@ -70,7 +72,7 @@ y_test = test_dataframe['Activity']
 print(f"\nTraining Set Shape: {X_train.shape}")
 print(f"Test set shape: {X_test.shape}")
 
-print("\nSubjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
+print("\nSubjects in Training Set:", sorted(train_dataframe['Subject'].unique()))
 print("Subjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
 
 # Preprocessing Training Data sets
