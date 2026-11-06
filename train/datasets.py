@@ -20,8 +20,8 @@ def load_data(dataFolder, mainFolder, feature_names, label_map):
     XData.columns = feature_names
 
     #Load y data
-    YRaw = pd.read_csv(testFolder/ f"y_{dataFolder.name}.txt", sep=r"\s+", header=None).values.ravel()
-    subject = pd.read_csv(testFolder/ f"subject_{dataFolder.name}.txt", sep=r"\s+", header=None).values.ravel()
+    YRaw = pd.read_csv(dataFolder/ f"y_{dataFolder.name}.txt", sep=r"\s+", header=None).values.ravel()
+    subject = pd.read_csv(dataFolder/ f"subject_{dataFolder.name}.txt", sep=r"\s+", header=None).values.ravel()
 
     # Map Labels
     yLabels = pd.Series(YRaw).map(label_map)
@@ -50,8 +50,9 @@ for name in feature_names:
 
 # Get Label Mapping
 
-activity_labels = pd.read_csv(mainFolder / "activity_labels.txt", sep=r"\s+", header=None, names=["label_id", "activity_names"])
-label_to_activity = dict(zip(activity_labels["label_id"], activity_labels["activity_name"]))
+activity_labels = pd.read_csv(mainFolder / "activity_labels.txt", sep=r"\s+", header=None) 
+
+label_to_activity = dict(zip(activity_labels.iloc[:, 0], activity_labels.iloc[:, 1]))
 
 # Load, Train, and Test Data
 
