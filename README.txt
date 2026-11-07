@@ -1,82 +1,87 @@
-===================================================================================================
-Human Activity Recognition Using Smartphones Dataset
-Version 1.0
-===================================================================================================
-Jorge L. Reyes-Ortiz(1,2), Davide Anguita(1), Alessandro Ghio(1), Luca Oneto(1) and Xavier Parra(2)
-1 - Smartlab - Non-Linear Complex Systems Laboratory
-DITEN - Universit�  degli Studi di Genova, Genoa (I-16145), Italy. 
-2 - CETpD - Technical Research Centre for Dependency Care and Autonomous Living
-Universitat Polit�cnica de Catalunya (BarcelonaTech). Vilanova i la Geltr� (08800), Spain
-activityrecognition '@' smartlab.ws 
-===================================================================================================
+Synopsis:
+The objective of this project is to use machine learning method that can recognize the activity of a 
+participant whose data was not used for training. 
 
-The experiments have been carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, we captured 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz. The experiments have been video-recorded to label the data manually. The obtained dataset has been randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data. 
+The experiment had classified basic human physical activites using a smartphone accelerometer 
+and gyroscope recordings. 
 
-The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56 sec and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain. See 'features_info.txt' for more details. 
+The UCI Human Activity Recognition dataset contains over 10,000 windows of data from 30 participants, 6 activity classes,
+and 561 engineered features, and corresponding preprocessed sensor sequences. The represenataions of this data is shown
+by tabular and sequential methods.
 
-For each record it is provided:
-======================================
+Gustavo Alatriste – K Nearest Neighbors, Documentation and Coding
+Aerith Brieden – Random Forests, Testing
+Atlas Infante – Logarithmic Classifiers, Testing
+Ngoc Yen Nhi Ha- RBF Kernel Support Vector Machine, Presentation Slides
 
-- Triaxial acceleration from the accelerometer (total acceleration) and the estimated body acceleration.
-- Triaxial Angular velocity from the gyroscope. 
-- A 561-feature vector with time and frequency domain variables. 
-- Its activity label. 
-- An identifier of the subject who carried out the experiment.
+ML Methods/Pipelines:
+For this project, we will use the K Nearest Neighbors, Random Forests, Logarithmic
+Classifiers, and the RBF Kernel Support Vector Machine methods to experiment on the
+given datasets and related features.
+Moreover, the RBF method will be our focused selection for a more in-depth study. Given
+the dataset’s size and variety including over 7k recordings of human movement and over
+560 engineered features extracted, the RBF Kernel SVM allows for accurate measurements
+and predictions.
 
-The dataset includes the following files:
-=========================================
+Focused Experimental Question:
+How sensitive is the selected model to one important hyperparameter or modeling choice?
 
-- 'README.txt'
+Data Splitting:
+Using the test dataset, we can evaluate how well the chosen models can predict the
+engineered features on unseen subjects.
+However, to create more accurate predictions without data leakage (our predictions being
+“too” right), performing cross validation on the training dataset can help us achieve this
+objective.
 
-- 'features_info.txt': Shows information about the variables used on the feature vector.
+In this project, the dataset will be tested across all models using the same fixed set and
+splits. As the project continues, having varying splits on either the training or test datasets
+will be necessary for more complex machine learning models.
 
-- 'features.txt': List of all features.
+Control/Fixed Factors:
+In the RBF-Kernal SVM, all factors include the data points and the gamma variable, γ, the
+parameter that says how quickly similarity falls off.
+K(x,x') = e^ (- γ ||x – x'||^2)
+x,x' are the chosen data points; γ is the gamma variable, e log function. Hence, the control
+factor is the gamma variable, and the fixed ones would be the dataset points because
+those don’t change in value.
 
-- 'activity_labels.txt': Links the class labels with their activity name.
+In the KNN method, the controlled factor would be the number of neighbors used for
+plotting new points. An exact value has not been decided yet, but it is expected to be
+between 10 and 20.
+In the Random Forests method, a controlled factor would be the number of decision trees
+made. Similarly to the KNN method, an exact value for the generated number of trees is not
+yet decided but is expected to be in the range of 100 to 200.
 
-- 'train/X_train.txt': Training set.
+Evaluation Metrics:
+We'll primarily use macro-F1 to ensure all six activities are weighted equally, preventing
+frequent classes from masking errors in minority ones. Along with overall accuracy and
+confusion matrices, this helps us catch specific mix-ups—like confusing active walking
+with standing. To test true generalization, we'll evaluate strictly on unseen participants,
+while also tracking per-person accuracy and computation runtimes.
 
-- 'train/y_train.txt': Training labels.
+Future Concepts:
+Newer concepts: A concept we may utilize during the project is the kernel regression
+model. This can be useful for distinguishing complex engineering features from both the
+training and test datasets. It does this by using a kernelized model or a nonparametric
+technique where smooth curves are produced using nearby observations and weighing
+them based on the kernel function. The kernel trick helps transform the low dimensional
+data into either high dimensional or infinite dimensional spaces and performs such model
+without computing the data’s coordinates.
+Another future concept is the stochastic gradient descent. Unlike a normal gradient
+descent function that uses an entire dataset for calculating the loss function, this
+approach uses only a selected, randomly chosen training example at each iteration. This
+can be very useful to avoid data leakage.
 
-- 'test/X_test.txt': Test set.
+Student-written component:
+A custom NumPy implementation of PCA using SVD and a fully customized PyTorch
+training/evaluation loop with explicit gradient tracking and validation checkpointing.
 
-- 'test/y_test.txt': Test labels.
 
-The following files are available for the train and test data. Their descriptions are equivalent. 
+Initial Results:
+The first table shows the a selected window of a time recording, 2.56 seconds to be exact, versus
+a selected number engineered features generated. Each value consists of an average of the several senor readings recored, 
+along with the corresponding subject and activity. 
+The second table shows three features's averages on all activities peformed. The data roughly shows the mean in each direction
+of movement (x, y, and z directions).
 
-- 'train/subject_train.txt': Each row identifies the subject who performed the activity for each window sample. Its range is from 1 to 30. 
-
-- 'train/Inertial Signals/total_acc_x_train.txt': The acceleration signal from the smartphone accelerometer X axis in standard gravity units 'g'. Every row shows a 128 element vector. The same description applies for the 'total_acc_x_train.txt' and 'total_acc_z_train.txt' files for the Y and Z axis. 
-
-- 'train/Inertial Signals/body_acc_x_train.txt': The body acceleration signal obtained by subtracting the gravity from the total acceleration. 
-
-- 'train/Inertial Signals/body_gyro_x_train.txt': The angular velocity vector measured by the gyroscope for each window sample. The units are radians/second. 
-
-Notes: 
-======
-- Features are normalized and bounded within [-1,1].
-- Each feature vector is a row on the text file.
-- The units used for the accelerations (total and body) are 'g's (gravity of earth -> 9.80665 m/seg2).
-- The gyroscope units are rad/seg.
-- A video of the experiment including an example of the 6 recorded activities with one of the participants can be seen in the following link: http://www.youtube.com/watch?v=XOEN9W05_4A
-
-For more information about this dataset please contact: activityrecognition '@' smartlab.ws
-
-License:
-========
-Use of this dataset in publications must be acknowledged by referencing the following publication [1] 
-
-[1] Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. A Public Domain Dataset for Human Activity Recognition Using Smartphones. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013. 
-
-This dataset is distributed AS-IS and no responsibility implied or explicit can be addressed to the authors or their institutions for its use or misuse. Any commercial use is prohibited.
-
-Other Related Publications:
-===========================
-[2] Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra, Jorge L. Reyes-Ortiz.  Energy Efficient Smartphone-Based Activity Recognition using Fixed-Point Arithmetic. Journal of Universal Computer Science. Special Issue in Ambient Assisted Living: Home Care.   Volume 19, Issue 9. May 2013
-
-[3] Davide Anguita, Alessandro Ghio, Luca Oneto, Xavier Parra and Jorge L. Reyes-Ortiz. Human Activity Recognition on Smartphones using a Multiclass Hardware-Friendly Support Vector Machine. 4th International Workshop of Ambient Assited Living, IWAAL 2012, Vitoria-Gasteiz, Spain, December 3-5, 2012. Proceedings. Lecture Notes in Computer Science 2012, pp 216-223. 
-
-[4] Jorge Luis Reyes-Ortiz, Alessandro Ghio, Xavier Parra-Llanas, Davide Anguita, Joan Cabestany, Andreu Catal�. Human Activity and Motion Disorder Recognition: Towards Smarter Interactive Cognitive Environments. 21th European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning, ESANN 2013. Bruges, Belgium 24-26 April 2013.  
-
-==================================================================================================
-Jorge L. Reyes-Ortiz, Alessandro Ghio, Luca Oneto, Davide Anguita and Xavier Parra. November 2013.
+<img width="920" height="368" alt="Image" src="https://github.com/user-attachments/assets/e84fe582-f7a8-401e-94f0-bdcbf36f3c0f" />
