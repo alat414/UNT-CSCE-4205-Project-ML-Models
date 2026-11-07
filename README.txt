@@ -85,3 +85,17 @@ The second table shows three features's averages on all activities peformed. The
 of movement (x, y, and z directions).
 
 <img width="920" height="368" alt="Image" src="https://github.com/user-attachments/assets/6e0a3c8e-d448-4cc7-8e4e-b57f1b43645a"/>
+
+Random Forest Trail:
+Using a value of 100 for the n_estimators, number of trees, and a given random state, the Random Forest method 
+is used. Within the method, key functions include the standard scalar and the random forest classifier, which uses two
+hyperparameters. The standard scalar helps standardize the engineered features by centering them around the mean of 0
+and scaling them to a standard deviation of 1. This is also known as normalization. 
+The second key function generates random forests based on the number in the hyperparameter, through using subsets of the data and 
+features. Once each forest makes a prediction on the unknown data, the most popular is used as the final prediciton. 
+
+<img width="622" height="412" alt="Image" src="https://github.com/user-attachments/assets/9ffac729-eafd-45dd-8396-b0f3b779b77d" />
+
+Based on the results and their non-uniform values throughout, we can safely assume they are real data.
+With the exception of laying down, it is normal for the prediciton to be slightly off for both 
+precision and recall metrics. 
