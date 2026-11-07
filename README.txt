@@ -84,4 +84,4 @@ along with the corresponding subject and activity.
 The second table shows three features's averages on all activities peformed. The data roughly shows the mean in each direction
 of movement (x, y, and z directions).
 
-<img width="920" height="368" alt="Image" src="https://github.com/user-attachments/assets/e84fe582-f7a8-401e-94f0-bdcbf36f3c0f" />
+c:\Users\gusta\Documents\School\CSCE 4205\Initial DF.png
