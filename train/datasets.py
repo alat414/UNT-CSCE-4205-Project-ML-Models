@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 import sklearn
 from pathlib import Path
-from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
-
+from sklearn.preprocessing import StandardScaler
 # Path Setup
 
 currentFolder = Path(__file__).parent #train folder
@@ -56,10 +56,10 @@ label_to_activity = dict(zip(activity_labels.iloc[:, 0], activity_labels.iloc[:,
 
 # Load, Train, and Test Data
 
-print("Loading training data")
+print("Loading training data...")
 train_dataframe = load_data(currentFolder, mainFolder, unique_names, label_to_activity)
 
-print("Loading training data")
+print("Loading test data...")
 test_dataframe = load_data(testFolder, mainFolder, unique_names, label_to_activity)
 
 # Separate Features and Labels
@@ -82,17 +82,26 @@ scalar = StandardScaler() # function used for standardization
 X_train_scaled = scalar.fit_transform(X_train)
 X_test_scaled = scalar.transform(X_test)
 
+baseline_randomForest = RandomForestClassifier(n_estimators=100, random_state=42)
+baseline_randomForest.fit(X_train_scaled, y_train)
+
 # Train Random Forest Model
-print("\nTraining Random Forest...")
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X_train_scaled, y_train)
+#print("\nTraining Random Forest...")
+#model.fit(X_train_scaled, y_train)
+
+topFeatures = SelectFromModel(baseline_randomForest, threshold='median', prefit=True) # Median retains the top half total engineered features
+X_train_selected = topFeatures.transform(X_train_scaled)
+X_test_selected = topFeatures.transform(X_test_scaled)
+
+randomForest_selected = RandomForestClassifier(n_estimators=100, random_state=42)
+randomForest_selected.fit(X_train_selected, y_train)
 
 #Evaluate on Unseen Subjects
-YPrediction = model.predict(X_test_scaled)
+YPrediction = randomForest_selected.predict(X_test_selected)
 
 print("\n" + "="*60)
-print("Evaluation on Unseen Test Subjects (22-30)")
+print("Evaluation on Top Subjects")
 print("="*60)
-print(f"Accuracy: {accuracy_score(y_test,YPrediction):.4f}\n")
+print(f"Accuracy with Feature Selection: {accuracy_score(y_test, YPrediction):.4f}\n")
 print("Classification Report:")
 print(classification_report(y_test, YPrediction))
