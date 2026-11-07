@@ -39,11 +39,14 @@ X_train['Activity'] = y_train_named
 
 print("Combined DataFrame shape:", X_train.shape)
 print("\n First five rows and five columns:")
-print(X_train.iloc[:10, list(range(3)) + [-2, -1]].to_string())
+print(X_train.iloc[:5, :5].to_string())
+
+#print("\nViewing 'tBodyAcc-mean():")
+#print(X_train['tBodyAcc-mean()-X'].head())
 
 # View a specific feature (e.g., 'tBodyAcc-mean()-X')
 #print(X_train['tBodyAcc-mean()-X'].head())
 
-
 # Look at the average of all features for each activity
-print(X_train.groupby('Activity').mean().iloc[:, :6])
+print("\nAverage of the first three features grouped by Activity:")
+print(X_train.groupby('Activity').mean().iloc[:, :3])
