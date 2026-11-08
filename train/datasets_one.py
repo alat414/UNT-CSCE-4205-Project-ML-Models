@@ -1,17 +1,19 @@
 import pandas as pd
 import numpy as np
-import sklearn
 import matplotlib.pyplot as plt
 from pathlib import Path
 from collections import Counter
+from matplotlib.colors import ListedColormap
 from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
 from sklearn import metrics
+from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
-from matplotlib.colors import ListedColormap
+
 
 # Path Setup
 
@@ -100,31 +102,58 @@ print("Subjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
 ###########################################################################################
 # Preprocessing Training Data sets
 ###########################################################################################
-knn = KNeighborsClassifier(n_neighbors=3)
+print("Scaling the data...")
+scaler = StandardScaler()
+XTrainScaled = scaler.fit_transform(X_train)
+XTestScaled = scaler.transform(X_test)
 
-knn.fit(X_train, y_train)
+print("Training KNN k=5")
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(XTrainScaled, y_train)
 
-x_set, y_set = X_train, y_train
+# Evaluate on unseen subjects
+YPredicition = knn.predict(XTestScaled)
+print(f"\nKNN Test Accuracy: {accuracy_score(y_test, YPredicition):.4f}\n")
+print(classification_report(y_test, YPredicition))
 
-xOne, xTwo = np.meshgrid(np.arrange(start = x_set[:, 0].min()-1, stop = x_set[:, 0].max()+1, step = 0.01),
-                         np.arrange(start = x_set[:, 1].min()-1, stop = x_set[:, 1].max()+1, step = 0.01),)
+# Using PCA for graphic visualization
+print("Creating 2D PCA projection for visualization...")
+pca = PCA(n_components=2)
+XTrain_PCA = pca.fit_transform(XTrainScaled)
 
-plt.contourf(xOne, xTwo, knn.predict(np.array([xOne.ravel(), xTwo.ravel()]).T).reshape(xOne.shape),
-            alpha =0.75, cmap = ListedColormap(('red', 'green')))
-plt.xlim(xOne.min(), xOne.max())
-plt.ylim(xTwo.min(), xTwo.max())
+xMin, xMax = XTrain_PCA[:, 0].min() - 1, XTrain_PCA[:, 0].max() + 1
+yMin, yMax = XTrain_PCA[:, 1].min() - 1, XTrain_PCA[:, 1].max() + 1
+xGrid, yGrid = np.meshgrid(np.arange(xMin, xMax, 0.1),
+                          np.arange(yMin, yMax, 0.1))
 
-for i ,j in enumerate (np.unique(y_set)):
-    plt.scatter(x_set[y_set == j, 0], x_set[y_set == j, 1],
-                c = ListedColormap(('blue', 'yellow')(i), label = j))
+# Training new KNN 
+knn2D = KNeighborsClassifier(n_neighbors=5)
+knn2D.fit(XTrain_PCA, y_train) 
 
+#Predict on the meshgrid
+graph2D = knn2D.predict(np.c_[xGrid.ravel(), yGrid.ravel()])
+graph2D = graph2D.reshape(xGrid.shape)
 
-###########################################################################################
-#Project Predicted Subjects
-###########################################################################################
+# Convert strings to numbers for matplotlib
+y_train_cat = y_train.astype('category')
+y_train_codes = y_train_cat.cat.codes
 
-plt.title("KNN training set")
-plt.xlabel('features')
-plt.ylabel('activities')
-plt.legend()
+# Convert meshgrid predictions to the same numbers
+graph2D_codes = pd.Categorical(graph2D.ravel(), categories=y_train_cat.cat.categories).codes
+graph2D_codes = graph2D_codes.reshape(xGrid.shape)
+
+# Color codes
+colors = ListedColormap(['#FF9999', '#66B2FF', '#99FF99', '#FFCC99', '#c2c2f0', '#ffb3e6'])
+
+# Plotting
+plt.figure(figsize=(10, 8))
+plt.contourf(xGrid, yGrid, graph2D_codes, alpha=0.4, cmap=colors)
+scatter = plt.scatter(XTrain_PCA[:, 0], XTrain_PCA[:, 1],
+                      c=y_train_codes, cmap=colors, edgecolors='k', s=30)
+
+plt.title("KNN Decision Boundary (PCA reduced to 2D)")
+plt.xlabel('Principal component 1')
+plt.ylabel('Principal component 2')
+
+plt.legend(handles=scatter.legend_elements()[0], labels=list(y_train_cat.cat.categories), loc='best')
 plt.show()
