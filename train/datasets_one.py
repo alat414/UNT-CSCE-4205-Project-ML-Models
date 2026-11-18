@@ -2,9 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-from collections import Counter
 from matplotlib.colors import ListedColormap
-from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -24,7 +22,7 @@ testFolder = mainFolder / "test" #test folder
 def euclidean_distance(pointOne, pointTwo):
     return np.sqrt(np.sum((np.array(pointOne) - np.array(pointTwo))**2))
 
-def load_data(dataFolder, mainFolder, feature_names, label_map):
+def load_data(dataFolder, feature_names, label_map):
     # Load x data
     XData = pd.read_csv(dataFolder/ f"X_{dataFolder.name}.txt", sep=r"\s+", header=None)
     XData.columns = feature_names
@@ -95,11 +93,11 @@ print(f"Test set shape: {X_test.shape}")
 print("\nSubjects in Training Set:", sorted(train_dataframe['Subject'].unique()))
 print("Subjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
 
-distance_training = (train_dataframe['Activity'].value_counts().rename_axis('Activity').reset_index(name='n_samples'))
-distance_training['pct'] = (distance_training['n_samples'] / len(train_dataframe) * 100).round(2)
+distribution_training = (train_dataframe['Activity'].value_counts().rename_axis('Activity').reset_index(name='n_samples'))
+distribution_training['pct'] = (distribution_training['n_samples'] / len(train_dataframe) * 100).round(2)
 
 print("\nTraining Label Distribution: ")
-print(distance_training.to_string(index=False))
+print(distribution_training.to_string(index=False))
 
 ###########################################################################################
 # Preprocessing Training Data sets
@@ -111,7 +109,7 @@ XTestScaled = scaler.transform(X_test)
 
 distance = euclidean_distance(XTrainScaled[0], XTrainScaled[1])
 assert distance > 0, "Euclidean distance is zero - checking scaling and loading"
-print(f"Sanity Check : Euclidean distance between train[0] and train[1]: {d:.4f}")
+print(f"Sanity Check : Euclidean distance between train[0] and train[1]: {distance:.4f}")
 print(f"Sanity Check : Euclidean distance between train[0] and test[0]: " 
       f"{euclidean_distance(XTrainScaled[0], XTestScaled[0]):.4f}")
 
@@ -152,7 +150,6 @@ knn2D.fit(XTrain_PCA, y_train)
 
 #Predict on the meshgrid
 graph2D = knn2D.predict(np.c_[xGrid.ravel(), yGrid.ravel()])
-graph2D = graph2D.reshape(xGrid.shape)
 
 # Convert strings to numbers for matplotlib
 y_train_cat = y_train.astype('category')
@@ -173,7 +170,7 @@ colors = ListedColormap([color_for[c] for c in categories]) # Same order as code
 
 # Plotting
 plt.figure(figsize=(10, 8))
-plt.contourf(xGrid, yGrid, graph2D_codes, levels=np.arrange(-0.5, len(categories) + 0.5, 1), alpha=0.4, cmap=colors)
+plt.contourf(xGrid, yGrid, graph2D_codes, levels=np.arange(-0.5, len(categories) + 0.5, 1), alpha=0.4, cmap=colors)
 scatter = plt.scatter(XTrain_PCA[:, 0], XTrain_PCA[:, 1],
                       c=y_train_codes, cmap=colors, edgecolors='k', s=30)
 
