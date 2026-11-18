@@ -115,6 +115,18 @@ print(f"Features retained: {X_train_selected.shape[1]} / {X_train_scaled.shape[1
 print("Classification Report:")
 print(classification_report(y_test, Y_Prediction))
 
+# Adding multiple threshold percentages to see which is the most optimal choice
+thresholds = ['median', 0.001, 0.002, 0.005]
+print("\nThreshold Sweep:")
+print(f"{'threshold':>10} {'n_features':>12} {'test_acc':>10}")
+for thr in thresholds:
+    selector = SelectFromModel(baseline_randomForest, threshold=thr, prefit=True)
+    set_XTrain = selector.transform(X_train_scaled)
+    set_XTest = selector.transform(X_test_scaled)
+    random_Forest = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+    random_Forest.fit(set_XTrain, y_train)
+    print(f"{str(thr):>10} {set_XTrain.shape[1]:>12} {accuracy_score(y_test, random_Forest.predict(set_XTest)):>10.4f}")
+
 # Add Confusion Matrix for quality results
 ConfusionMatrixDisplay.from_predictions(y_test, Y_Prediction, xticks_rotation=45, cmap='Blues')
 plt.title("Random Forests Confusion Matrix - Test Set")
