@@ -34,6 +34,10 @@ def load_data(dataFolder, feature_names, label_map):
     # Map Labels
     yLabels = pd.Series(YRaw).map(label_map)
 
+    # Avoid the repeated frame
+    meta = pd.DataFrame({"Subject": subject, "Activtiy": yLabels})
+    return pd.concat([XData, meta], axis=1)
+
     # Add to dataframe for tracking purposes
     XData['Subject'] = subject
     XData['Activity'] = yLabels
