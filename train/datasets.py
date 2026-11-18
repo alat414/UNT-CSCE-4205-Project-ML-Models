@@ -85,8 +85,10 @@ baseline_randomForest = RandomForestClassifier(n_estimators=100, random_state=42
 baseline_randomForest.fit(X_train_scaled, y_train)
 
 # Baseline Random Forest Prediction
-baseline_prediction = baseline_randomForest.predict(X_test_scaled)
-print(f"Baseline Random Forests (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction):.4f}")
+baseline_prediction_train = baseline_randomForest.predict(X_train_scaled)
+baseline_prediction_test = baseline_randomForest.predict(X_test_scaled)
+print(f"Baseline Random Forests (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction_train):.4f}")
+print(f"Baseline Random Forests (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction_test):.4f}")
 
 top_Features = SelectFromModel(baseline_randomForest, threshold='median', prefit=True) # Median retains the top half total engineered features
 X_train_selected = top_Features.transform(X_train_scaled)
