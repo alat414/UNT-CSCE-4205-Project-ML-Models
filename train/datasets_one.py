@@ -70,10 +70,10 @@ label_to_activity = dict(zip(activity_labels.iloc[:, 0], activity_labels.iloc[:,
 # Load, Train, and Test Data
 ###########################################################################################
 print("Loading training data...")
-train_dataframe = load_data(currentFolder, mainFolder, unique_names, label_to_activity)
+train_dataframe = load_data(currentFolder, unique_names, label_to_activity)
 
 print("Loading test data...")
-test_dataframe = load_data(testFolder, mainFolder, unique_names, label_to_activity)
+test_dataframe = load_data(testFolder, unique_names, label_to_activity)
 
 ###########################################################################################
 # Separate Features and Labels
@@ -132,7 +132,6 @@ ConfusionMatrixDisplay.from_predictions(
 
 plt.title("KNN Confusion Matrix -- Test Set")
 plt.tight_layout()
-plt.show()
 
 # Using PCA for graphic visualization
 print("Creating 2D PCA projection for visualization...")
