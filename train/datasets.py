@@ -24,7 +24,7 @@ def load_data(dataFolder, feature_names, label_map):
     subject = pd.read_csv(dataFolder/ f"subject_{dataFolder.name}.txt", sep=r"\s+", header=None).values.ravel()
 
     # Map Labels
-    yLabels = pd.Series(YRaw).map(label_map)
+    yLabels = pd.Series(YRaw).map(label_map).to_numpy()
 
     # Joined metadata frame
     meta = pd.DataFrame({"Subject": subject, "Activity": yLabels})
@@ -87,8 +87,8 @@ baseline_randomForest.fit(X_train_scaled, y_train)
 # Baseline Random Forest Prediction
 baseline_prediction_train = baseline_randomForest.predict(X_train_scaled)
 baseline_prediction_test = baseline_randomForest.predict(X_test_scaled)
-print(f"Baseline Random Forests (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction_train):.4f}")
-print(f"Baseline Random Forests (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction_test):.4f}")
+print(f"Baseline Random Forests training set (all {X_train_scaled.shape[1]} features): {accuracy_score(y_train, baseline_prediction_train):.4f}")
+print(f"Baseline Random Forests test set (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction_test):.4f}")
 
 top_Features = SelectFromModel(baseline_randomForest, threshold='median', prefit=True) # Median retains the top half total engineered features
 X_train_selected = top_Features.transform(X_train_scaled)
@@ -99,12 +99,6 @@ randomForest_selected.fit(X_train_selected, y_train)
 
 #Evaluate on Unseen Subjects
 Y_Prediction = randomForest_selected.predict(X_test_selected)
-
-# Feature Importance Plot
-importances = pd.Series(baseline_randomForest.feature_importances_, index=X_train.columns)
-top20 = importances.nlargest(20)
-top20.sort_values().plot.barh(figsize=(8,6))
-plt.title("Top 20 Feature Importances for Baseline Random Forests")
 
 print("\n" + "="*60)
 print("Evaluation on Top Subjects")
@@ -123,9 +117,16 @@ for thr in thresholds:
     selector = SelectFromModel(baseline_randomForest, threshold=thr, prefit=True)
     set_XTrain = selector.transform(X_train_scaled)
     set_XTest = selector.transform(X_test_scaled)
-    random_Forest = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-    random_Forest.fit(set_XTrain, y_train)
-    print(f"{str(thr):>10} {set_XTrain.shape[1]:>12} {accuracy_score(y_test, random_Forest.predict(set_XTest)):>10.4f}")
+    random_Forest_sweep = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+    random_Forest_sweep.fit(set_XTrain, y_train)
+    print(f"{str(thr):>10} {set_XTrain.shape[1]:>12} {accuracy_score(y_test, random_Forest_sweep.predict(set_XTest)):>10.4f}")
+
+# Feature Importance Plot
+importances = pd.Series(baseline_randomForest.feature_importances_, index=X_train.columns)
+top20 = importances.nlargest(20)
+top20.sort_values().plot.barh(figsize=(8,6))
+plt.title("Top 20 Feature Importances for Baseline Random Forests")
+plt.show()
 
 # Add Confusion Matrix for quality results
 ConfusionMatrixDisplay.from_predictions(y_test, Y_Prediction, xticks_rotation=45, cmap='Blues')
