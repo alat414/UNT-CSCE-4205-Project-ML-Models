@@ -34,15 +34,16 @@ def load_data(dataFolder, feature_names, label_map):
     # Map Labels
     yLabels = pd.Series(YRaw).map(label_map)
 
-    # Avoid the repeated frame
-    meta = pd.DataFrame({"Subject": subject, "Activtiy": yLabels})
-    return pd.concat([XData, meta], axis=1)
+    meta = pd.DataFrame({"Subject": subject, "Activity": yLabels})
+    result = pd.concat([XData.reset_index(drop=True), meta], axis=1)
 
-    # Add to dataframe for tracking purposes
-    XData['Subject'] = subject
-    XData['Activity'] = yLabels
+    # Displaying used data frames
+    print("meta columns:", meta.columns.tolist())
+    print("meta shape:", meta.shape)
+    print("result tail:", result.columns[-5:].tolist())
+    print("result shape:", result.shape)
 
-    return XData
+    return result
 
 ###########################################################################################
 # Get Feature Names
