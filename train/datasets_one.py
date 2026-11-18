@@ -95,6 +95,12 @@ print(f"Test set shape: {X_test.shape}")
 print("\nSubjects in Training Set:", sorted(train_dataframe['Subject'].unique()))
 print("Subjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
 
+distance_training = (train_dataframe['Activity'].value_counts().rename_axis('Activity').reset_index(name='n_samples'))
+distance_training['pct'] = (distance_training['n_samples'] / len(train_dataframe) * 100).round(2)
+
+print("\nTraining Label Distribution: ")
+print(distance_training.to_string(index=False))
+
 ###########################################################################################
 # Preprocessing Training Data sets
 ###########################################################################################
@@ -102,6 +108,12 @@ print("Scaling the data...")
 scaler = StandardScaler()
 XTrainScaled = scaler.fit_transform(X_train)
 XTestScaled = scaler.transform(X_test)
+
+distance = euclidean_distance(XTrainScaled[0], XTrainScaled[1])
+assert distance > 0, "Euclidean distance is zero - checking scaling and loading"
+print(f"Sanity Check : Euclidean distance between train[0] and train[1]: {d:.4f}")
+print(f"Sanity Check : Euclidean distance between train[0] and test[0]: " 
+      f"{euclidean_distance(XTrainScaled[0], XTestScaled[0]):.4f}")
 
 print("Training KNN k=5")
 knn = KNeighborsClassifier(n_neighbors=5)
@@ -115,6 +127,14 @@ YPredicition = knn.predict(XTestScaled)
 print(f"\nKNN Test Accuracy: {accuracy_score(y_test, YPredicition):.4f}\n")
 print(classification_report(y_test, YPredicition))
 
+# Confusion Matrix for evaluation purposes
+ConfusionMatrixDisplay.from_predictions(
+    y_test, YPredicition, xticks_rotation=45, cmap='Blues'
+)
+
+plt.title("KNN Confusion Matrix -- Test Set")
+plt.tight_layout()
+plt.show()
 
 # Using PCA for graphic visualization
 print("Creating 2D PCA projection for visualization...")
