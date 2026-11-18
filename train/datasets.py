@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import sklearn
+
 from pathlib import Path
 from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import RandomForestClassifier
@@ -14,7 +14,7 @@ testFolder = mainFolder / "test" #test folder
 
 # Function Definitions
 
-def load_data(dataFolder, mainFolder, feature_names, label_map):
+def load_data(dataFolder, feature_names, label_map):
     # Load x data
     XData = pd.read_csv(dataFolder/ f"X_{dataFolder.name}.txt", sep=r"\s+", header=None)
     XData.columns = feature_names
@@ -26,11 +26,10 @@ def load_data(dataFolder, mainFolder, feature_names, label_map):
     # Map Labels
     yLabels = pd.Series(YRaw).map(label_map)
 
-    # Add to dataframe for tracking purposes
-    XData['Subject'] = subject
-    XData['Activity'] = yLabels
+    # Displaying used data frames
+    meta = pd.DataFrame({"Subject": subject, "Activity": yLabels})
 
-    return XData
+    return pd.concat([XData.reset_index(drop=True), meta], axis=1)
 
 # Get Feature Names
 
@@ -77,17 +76,20 @@ print("\nSubjects in Training Set:", sorted(train_dataframe['Subject'].unique())
 print("Subjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
 
 # Preprocessing Training Data sets
-scalar = StandardScaler() # function used for standardization
+scaler = StandardScaler() # function used for standardization
 
-X_train_scaled = scalar.fit_transform(X_train)
-X_test_scaled = scalar.transform(X_test)
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
 
 baseline_randomForest = RandomForestClassifier(n_estimators=100, random_state=42)
 baseline_randomForest.fit(X_train_scaled, y_train)
 
-# Train Random Forest Model
-#print("\nTraining Random Forest...")
-#model.fit(X_train_scaled, y_train)
+# Baseline Random Forest Prediction
+baseline_prediction = baseline_randomForest.predict(X_train_scaled)
+print(f"Baseline Random Forests (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction):.4f}")
+
+
 
 topFeatures = SelectFromModel(baseline_randomForest, threshold='median', prefit=True) # Median retains the top half total engineered features
 X_train_selected = topFeatures.transform(X_train_scaled)
@@ -103,5 +105,7 @@ print("\n" + "="*60)
 print("Evaluation on Top Subjects")
 print("="*60)
 print(f"Accuracy with Feature Selection: {accuracy_score(y_test, YPrediction):.4f}\n")
+print(f"Train acc (selected):  {accuracy_score(y_train, randomForest_selected.predict(X_train_selected)):.4f}")
+print(f"Features retained: {X_train_selected.shape[1]} / {X_train_scaled.shape[1]}")
 print("Classification Report:")
 print(classification_report(y_test, YPrediction))
