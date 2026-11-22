@@ -33,6 +33,15 @@ def get_hardware_info():
         pass
     return info
 
+# Gather hardware specifications prior to training
+hardware = get_hardware_info()
+print(f"Hardware Specifications")
+print("*" * 20)
+for item, item1 in hardware.items():
+    print(f"{item:>20}: {item1}")
+print("*" * 20)
+
+
 # Function Definitions
 def load_data(dataFolder, feature_names, label_map):
     # Load x data
