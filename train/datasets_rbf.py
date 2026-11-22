@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
@@ -45,12 +44,10 @@ for name in feature_names:
         unique_names.append(name)
 
 # Get Label Mapping
-
 activity_labels = pd.read_csv(mainFolder / "activity_labels.txt", sep=r"\s+", header=None) 
 label_to_activity = dict(zip(activity_labels.iloc[:, 0], activity_labels.iloc[:, 1]))
 
 # Load, Train, and Test Data
-
 print("Loading training data...")
 train_dataframe = load_data(currentFolder, unique_names, label_to_activity)
 
@@ -88,24 +85,26 @@ svm_test_pred = svm_rbf.predict(X_test_scaled)
 print(f"\nRBF SVM Train acc (all {X_train_scaled.shape[1]} features):"
       f"{accuracy_score(y_train, svm_train_pred):.4f}")
 print(f"\nRBF SVM Test acc (all {X_train_scaled.shape[1]} features):"
-      f"{accuracy_score(y_test, svm_train_pred):.4f}")
+      f"{accuracy_score(y_test, svm_test_pred):.4f}")
 print("Classification Report:")
 print(classification_report(y_test, svm_test_pred))
 
 # Add Confusion Matrix for quality results
-ConfusionMatrixDisplay.from_predictions(y_test, svm_test_pred
-, xticks_rotation=45, cmap='Blues')
+ConfusionMatrixDisplay.from_predictions(
+    y_test, svm_test_pred, xticks_rotation=45, cmap='Blues'
+)
 plt.title("RBF SVM Confusion Matrix - Test Set")
+plt.tight_layout()
 plt.show()
 
 # Hyperparameter Sweep
-thresholds = [0.1, 1, 10, 100]
+C_values = [0.1, 1, 10, 100]
 
 print("\nHyperparameter Sweep (C, gamma):")
 print(f"{'C':>10} {'gamma':>10} {'test_acc':>10}")
-for C in thresholds:
+for C in C_values:
     for gamma in ['scale', 0.001, 0.01, 0.1]:
-        var = SVC(kernel='rbf', C=C, gamma=gamma, random_state=42)
-        var.fit(X_train_scaled, y_train)
-        acc = accuracy_score(y_test, var.predict(X_test_scaled))
-        print(f"{C:>6} {str(gamma)[1]:>10} {acc:>10.4f}")
+        model = SVC(kernel='rbf', C=C, gamma=gamma, random_state=42)
+        model.fit(X_train_scaled, y_train)
+        acc = accuracy_score(y_test, model.predict(X_test_scaled))
+        print(f"{C:>6} {str(gamma):>10} {acc:>10.4f}")
