@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
+import platform
+import psutil
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
 from sklearn.preprocessing import StandardScaler
@@ -10,6 +12,17 @@ from sklearn.svm import SVC
 currentFolder = Path(__file__).parent #train folder
 mainFolder = currentFolder.parent #Root folder (UCI Dataset)
 testFolder = mainFolder / "test" #test folder
+
+# Hardware Specifications
+def get_hardware_info():
+    info= {
+        "os":
+        "processor":
+        "cpu_cores_physical":
+        "cpu_cores_logical":
+        "ram_total_gb":
+        "gpu":
+    }
 
 # Function Definitions
 def load_data(dataFolder, feature_names, label_map):
