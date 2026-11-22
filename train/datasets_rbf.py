@@ -83,6 +83,13 @@ print("\nTraining RBF SVM...")
 svm_rbf = SVC(kernel='rbf', C=10, gamma='scale', random_state=42)
 svm_rbf.fit(X_train_scaled, y_train)
 
+# Get final training time 
+final_training_time = time.perf_counter() - start_training_time
+print(f"Training time: {final_training_time:.4f} seconds")
+
+# Start prediction time
+start_predict_time = time.perf_counter()
+
 svm_train_pred = svm_rbf.predict(X_train_scaled)
 svm_test_pred = svm_rbf.predict(X_test_scaled)
 
@@ -93,9 +100,9 @@ print(f"\nRBF SVM Test acc (all {X_train_scaled.shape[1]} features):"
 print("Classification Report:")
 print(classification_report(y_test, svm_test_pred))
 
-# Get final training time 
-final_training_time = time.perf_counter() - start_training_time
-print(f"Training time: {final_training_time:.4f} seconds")
+# Get final prediction time 
+final_predict_time = time.perf_counter() - start_predict_time
+print(f"Predicton time: {final_predict_time:.4f} seconds")
 
 # Add Confusion Matrix for quality results
 ConfusionMatrixDisplay.from_predictions(
