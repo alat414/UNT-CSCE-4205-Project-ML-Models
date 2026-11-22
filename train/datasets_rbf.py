@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import time
 import platform
 import psutil
+import joblib
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
 from sklearn.preprocessing import StandardScaler
@@ -16,13 +17,15 @@ testFolder = mainFolder / "test" #test folder
 # Hardware Specifications
 def get_hardware_info():
     info= {
-        "os":
-        "processor":
-        "cpu_cores_physical":
-        "cpu_cores_logical":
-        "ram_total_gb":
-        "gpu":
+        "os": f"{platform.system()}{platform.release()}",
+        "processor": platform.processor(),
+        "cpu_cores_physical": psutil.cpu_count(logical=False),
+        "cpu_cores_logical": psutil.cpu_count(logical=True),
+        "ram_total_gb": round(psutil.virtual_memory().total / (1024**3), 2),
+        "gpu": "None"
     }
+    
+
 
 # Function Definitions
 def load_data(dataFolder, feature_names, label_map):
