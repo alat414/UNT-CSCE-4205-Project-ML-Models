@@ -1,5 +1,9 @@
 import pandas as pd
 import numpy as np
+import platform
+import psutil
+import winreg
+import time
 import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn.feature_selection import SelectFromModel
@@ -13,6 +17,37 @@ mainFolder = currentFolder.parent #Root folder (UCI Dataset)
 testFolder = mainFolder / "test" #test folder
 
 # Function Definitions
+
+# Hardware Specifications
+def get_hardware_info():
+    info = {
+        "os": f"{platform.system()}{platform.release()}",
+        "processor": platform.processor(),
+        "cpu_cores_physical": psutil.cpu_count(logical=False),
+        "cpu_cores_logical": psutil.cpu_count(logical=True),
+        "ram_total_gb": round(psutil.virtual_memory().total / (1024**3), 2),
+        "gpu": "None"
+    }
+    try:
+        import torch
+        if torch.cuda.is_available():
+            info["gpu"] = torch.cuda.get_device_name(0)
+            info["gpu_vram_gb"] = round(torch.cuda.get_device_properties(0).total_memory / (1024**3),2)
+    except ImportError:
+        pass
+    return info
+
+# Gather hardware specifications prior to training
+key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                     r"HARDWARE\DESCRIPTION\System\CentralProcessor\0")
+cpu_name, _ = winreg.QueryValueEx(key, "ProcessorNameString")
+print(f"{cpu_name, _  }")
+hardware = get_hardware_info()
+print(f"Hardware Specifications")
+print("*" * 20)
+for item, item1 in hardware.items():
+    print(f"{item:>20}: {item1}")
+print("*" * 20)
 
 def load_data(dataFolder, feature_names, label_map):
     # Load x data
@@ -53,6 +88,9 @@ activity_labels = pd.read_csv(mainFolder / "activity_labels.txt", sep=r"\s+", he
 
 label_to_activity = dict(zip(activity_labels.iloc[:, 0], activity_labels.iloc[:, 1]))
 
+# Start train time
+start_training_time = time.perf_counter()
+
 # Load, Train, and Test Data
 
 print("Loading training data...")
@@ -75,6 +113,12 @@ print(f"Test set shape: {X_test.shape}")
 print("\nSubjects in Training Set:", sorted(train_dataframe['Subject'].unique()))
 print("Subjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
 
+# Get final training time 
+final_training_time = time.perf_counter() - start_training_time
+print(f"Training time: {final_training_time:.4f} seconds")
+
+# Start prediction time
+start_predict_time = time.perf_counter()
 # Preprocessing Training and Test Data sets
 scaler = StandardScaler() # function used for standardization
 
@@ -108,6 +152,10 @@ print(f"Train acc (selected):  {accuracy_score(y_train, randomForest_selected.pr
 print(f"Features retained: {X_train_selected.shape[1]} / {X_train_scaled.shape[1]}")
 print("Classification Report:")
 print(classification_report(y_test, Y_Prediction))
+
+# Get final prediction time 
+final_predict_time = time.perf_counter() - start_predict_time
+print(f"Predicton time: {final_predict_time:.4f} seconds")
 
 # Adding multiple threshold percentages to see which is the most optimal choice
 thresholds = ['median', 0.001, 0.002, 0.005]
