@@ -16,7 +16,7 @@ testFolder = mainFolder / "test" #test folder
 
 # Hardware Specifications
 def get_hardware_info():
-    info= {
+    info = {
         "os": f"{platform.system()}{platform.release()}",
         "processor": platform.processor(),
         "cpu_cores_physical": psutil.cpu_count(logical=False),
@@ -24,8 +24,14 @@ def get_hardware_info():
         "ram_total_gb": round(psutil.virtual_memory().total / (1024**3), 2),
         "gpu": "None"
     }
-    
-
+    try:
+        import torch
+        if torch.cuda.is_available():
+            info["gpu"] = torch.cuda.get_device_name(0)
+            info["gpu_vram_gb"] = round(torch.cuda.get_device_properties(0).total_memory / (1024**3),2)
+    except ImportError:
+        pass
+    return info
 
 # Function Definitions
 def load_data(dataFolder, feature_names, label_map):
