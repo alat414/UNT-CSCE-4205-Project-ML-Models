@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import time
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
 from sklearn.preprocessing import StandardScaler
@@ -47,7 +48,10 @@ for name in feature_names:
 activity_labels = pd.read_csv(mainFolder / "activity_labels.txt", sep=r"\s+", header=None) 
 label_to_activity = dict(zip(activity_labels.iloc[:, 0], activity_labels.iloc[:, 1]))
 
-# Load, Train, and Test Data
+# Start train time
+start_training_time = time.perf_counter()
+
+# Load Train, and Test Data
 print("Loading training data...")
 train_dataframe = load_data(currentFolder, unique_names, label_to_activity)
 
@@ -88,6 +92,10 @@ print(f"\nRBF SVM Test acc (all {X_train_scaled.shape[1]} features):"
       f"{accuracy_score(y_test, svm_test_pred):.4f}")
 print("Classification Report:")
 print(classification_report(y_test, svm_test_pred))
+
+# Get final training time 
+final_training_time = time.perf_counter() - start_training_time
+print(f"Training time: {final_training_time:.4f} seconds")
 
 # Add Confusion Matrix for quality results
 ConfusionMatrixDisplay.from_predictions(
