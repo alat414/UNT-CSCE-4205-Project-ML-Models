@@ -6,7 +6,7 @@ import psutil
 import winreg
 import joblib
 from pathlib import Path
-from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay,f1_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
@@ -122,16 +122,59 @@ start_predict_time = time.perf_counter()
 svm_train_pred = svm_rbf.predict(X_train_scaled)
 svm_test_pred = svm_rbf.predict(X_test_scaled)
 
-print(f"\nRBF SVM Train acc (all {X_train_scaled.shape[1]} features):"
+# Accuracy and macro F1 results
+print(f"\nRBF SVM Train accuracy (all {X_train_scaled.shape[1]} features):"
       f"{accuracy_score(y_train, svm_train_pred):.4f}")
 print(f"\nRBF SVM Test acc (all {X_train_scaled.shape[1]} features):"
       f"{accuracy_score(y_test, svm_test_pred):.4f}")
 print("Classification Report:")
 print(classification_report(y_test, svm_test_pred))
 
+print(f"RBF SVM Test  — Accuracy {accuracy_score(y_test, svm_test_pred):.4f} | "
+      f"macro-F1 {f1_score(y_test, svm_test_pred, average='macro'):.4f}")
+
+# --- Per-class F1 (test set) ---
+per_class_f1 = f1_score(y_test, svm_test_pred, average=None,
+                        labels=sorted(y_test.unique()))
+print("Per-class F1:", {k: round(float(v), 3)
+                        for k, v in zip(sorted(y_test.unique()), per_class_f1)})
+
 # Get final prediction time 
 final_predict_time = time.perf_counter() - start_predict_time
 print(f"Predicton time: {final_predict_time:.4f} seconds")
+
+# Showing all subject test performance (RBF SVM)
+test_eval_svm = test_dataframe[['Subject', 'Activity']].copy()
+test_eval_svm['pred'] = svm_test_pred
+
+print("\n" + "="*60)
+print("Per-Participant Test Performance (RBF SVM)")
+print("="*60)
+print(f"{'Subject':>8} {'n_samples':>10} {'accuracy':>10} {'macro_F1':>10}")
+
+per_subj_rows_svm = []
+for subj, grp in test_eval_svm.groupby('Subject'):
+    acc = (grp['Activity'] == grp['pred']).mean()
+    f1  = f1_score(grp['Activity'], grp['pred'], average='macro', zero_division=0)
+    per_subj_rows_svm.append((subj, len(grp), acc, f1))
+    print(f"{subj:>8} {len(grp):>10} {acc:>10.4f} {f1:>10.4f}")
+
+per_subj_df_svm = pd.DataFrame(
+    per_subj_rows_svm,
+    columns=['Subject', 'n_samples', 'accuracy', 'macro_F1']
+)
+
+print("-" * 60)
+print(f"{'mean':>8} {'':>10} {per_subj_df_svm['accuracy'].mean():>10.4f} {per_subj_df_svm['macro_F1'].mean():>10.4f}")
+print(f"{'std':>8} {'':>10} {per_subj_df_svm['accuracy'].std():>10.4f} {per_subj_df_svm['macro_F1'].std():>10.4f}")
+print(f"{'min':>8} {'':>10} {per_subj_df_svm['accuracy'].min():>10.4f} {per_subj_df_svm['macro_F1'].min():>10.4f}")
+print(f"{'max':>8} {'':>10} {per_subj_df_svm['accuracy'].max():>10.4f} {per_subj_df_svm['macro_F1'].max():>10.4f}")
+
+worst = per_subj_df_svm.loc[per_subj_df_svm['accuracy'].idxmin()]
+best  = per_subj_df_svm.loc[per_subj_df_svm['accuracy'].idxmax()]
+print(f"\n  Worst participant: subject {int(worst['Subject'])} (acc {worst['accuracy']:.4f})")
+print(f"  Best  participant: subject {int(best['Subject'])}  (acc {best['accuracy']:.4f})")
+print(f"  Spread (max-min):  {best['accuracy'] - worst['accuracy']:.4f}")
 
 # Add Confusion Matrix for quality results
 ConfusionMatrixDisplay.from_predictions(
