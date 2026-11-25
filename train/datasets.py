@@ -145,6 +145,25 @@ print(f"Selected Random Forests - Accuracy {accuracy_score(y_test, Y_Prediction)
 per_class_f1_score = f1_score(y_test, Y_Prediction, average=None, labels=sorted(y_test.unique()))
 print("Per-class F1:", {k: round (float(v), 3) for k, v in  zip(sorted(y_test.unique()), per_class_f1_score.round(3))})
 
+test_evaluation = test_dataframe[['Subject', 'Activity']].copy()
+test_evaluation['pred'] = Y_Prediction
+
+print("\n" + "="*60)
+print("Per- Participant Test Performance (Random Forest, selected model)")
+print("="*60)
+print(f"{'Subject':>8} {'n_samples':>10} {'accuracy':>10} {'macro_F1':>10}")
+
+per_subject_rows =[]
+for subject, group in test_evaluation.groupby('Subject'):
+    accuracy = (group['Activity'] == group['pred']).mean()
+    # Ensuring the subjects have a Macro F1 score of at least 1. 
+    f1 = f1_score(group['Average'], group['pred'], average='macro', zero_division=0)
+    per_subject_rows.append((subject, len(group), accuracy, f1))
+    print(f"{subject:>8} {len(group):>10} {accuracy:>10.4f}, {f1:>10.4f}")
+
+
+per_subject_difference = pd.Dataframe(per_subject_rows, columns=['Subject' 'n_samples' 'accuracy''macro_F1'])
+
 print("\n" + "="*60)
 print("Evaluation on Top Subjects")
 print("="*60)
