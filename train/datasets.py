@@ -143,7 +143,7 @@ print(f"Selected Random Forests - Accuracy {accuracy_score(y_test, Y_Prediction)
       f"macro-F1 {f1_score(y_test, Y_Prediction, average='macro'):.4f}")
 
 per_class_f1_score = f1_score(y_test, Y_Prediction, average=None, labels=sorted(y_test.unique()))
-print("Per-class F1:", dict(zip(sorted(y_test.unique()), per_class_f1_score.round(3))))
+print("Per-class F1:", {k: round (float(v), 3) for k, v in  zip(sorted(y_test.unique()), per_class_f1_score.round(3))})
 
 print("\n" + "="*60)
 print("Evaluation on Top Subjects")
