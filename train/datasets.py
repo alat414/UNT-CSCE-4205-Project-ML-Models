@@ -28,13 +28,7 @@ def get_hardware_info():
         "ram_total_gb": round(psutil.virtual_memory().total / (1024**3), 2),
         "gpu": "None"
     }
-    try:
-        import torch
-        if torch.cuda.is_available():
-            info["gpu"] = torch.cuda.get_device_name(0)
-            info["gpu_vram_gb"] = round(torch.cuda.get_device_properties(0).total_memory / (1024**3),2)
-    except ImportError:
-        pass
+    
     return info
 
 # Gather hardware specifications prior to training
