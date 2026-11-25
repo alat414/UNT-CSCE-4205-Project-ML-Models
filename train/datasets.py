@@ -169,7 +169,11 @@ print(f" {'std':>8} {'':>10} {per_subject_difference['accuracy'].std():>10.4f} {
 print(f" {'min':>8} {'':>10} {per_subject_difference['accuracy'].min():>10.4f} {per_subject_difference['macro_F1'].min():>10.4f}")
 print(f" {'max':>8} {'':>10} {per_subject_difference['accuracy'].max():>10.4f} {per_subject_difference['macro_F1'].max():>10.4f}")
 
-
+worst = per_subject_difference.loc[per_subject_difference['accuracy'].idxmin()]
+best  = per_subject_difference.loc[per_subject_difference['accuracy'].idxmax()]
+print(f"\n  Worst participant: subject {int(worst['Subject'])} (acc {worst['accuracy']:.4f})")
+print(f"  Best  participant: subject {int(best['Subject'])}  (acc {best['accuracy']:.4f})")
+print(f"  Spread (max-min):  {best['accuracy'] - worst['accuracy']:.4f}")
 
 print("\n" + "="*60)
 print("Evaluation on Top Subjects")
