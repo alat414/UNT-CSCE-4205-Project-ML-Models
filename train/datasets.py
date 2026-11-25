@@ -10,13 +10,11 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score
 from sklearn.preprocessing import StandardScaler
-# Path Setup
 
+# Path Setup
 currentFolder = Path(__file__).parent #train folder
 mainFolder = currentFolder.parent #Root folder (UCI Dataset)
 testFolder = mainFolder / "test" #test folder
-
-# Function Definitions
 
 # Hardware Specifications
 def get_hardware_info():
@@ -42,6 +40,7 @@ for item, item1 in hardware.items():
     print(f"{item:>20}: {item1}")
 print("*" * 20)
 
+# Import data from raw files
 def load_data(dataFolder, feature_names, label_map):
     # Load x data
     XData = pd.read_csv(dataFolder/ f"X_{dataFolder.name}.txt", sep=r"\s+", header=None)
@@ -60,7 +59,6 @@ def load_data(dataFolder, feature_names, label_map):
     return pd.concat([XData.reset_index(drop=True), meta], axis=1)
 
 # Get Feature Names
-
 features = pd.read_csv(mainFolder / "features.txt", sep=r"\s+", header=None)
 feature_names = features[1].values.tolist()
 
@@ -76,16 +74,13 @@ for name in feature_names:
         unique_names.append(name)
 
 # Get Label Mapping
-
 activity_labels = pd.read_csv(mainFolder / "activity_labels.txt", sep=r"\s+", header=None) 
-
 label_to_activity = dict(zip(activity_labels.iloc[:, 0], activity_labels.iloc[:, 1]))
 
 # Start train time
 start_training_time = time.perf_counter()
 
 # Load, Train, and Test Data
-
 print("Loading training data...")
 train_dataframe = load_data(currentFolder, unique_names, label_to_activity)
 
@@ -134,7 +129,8 @@ print(f"Baseline Random Forests test set (all {X_train_scaled.shape[1]} features
 print(f"Baseline Random Forests - Accuracy {accuracy_score(y_test, baseline_prediction_test):.4f} |"
       f"macro-F1 {f1_score(y_test, baseline_prediction_test, average='macro'):.4f}")
 
-top_Features = SelectFromModel(baseline_randomForest, threshold='median', prefit=True) # Median retains the top half total engineered features
+# Median retains the top half total engineered features
+top_Features = SelectFromModel(baseline_randomForest, threshold='median', prefit=True) 
 X_train_selected = top_Features.transform(X_train_scaled)
 X_test_selected = top_Features.transform(X_test_scaled)
 
