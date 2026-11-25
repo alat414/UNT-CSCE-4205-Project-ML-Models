@@ -100,9 +100,11 @@ y_train = train_dataframe['Activity']
 X_test = test_dataframe.drop(columns=['Subject', 'Activity'])
 y_test = test_dataframe['Activity']
 
+# Header
 print(f"\nTraining Set Shape: {X_train.shape}")
 print(f"Test set shape: {X_test.shape}")
 
+# Header
 print("\nSubjects in Training Set:", sorted(train_dataframe['Subject'].unique()))
 print("Subjects in Test Set:", sorted(test_dataframe['Subject'].unique()))
 
@@ -115,6 +117,7 @@ start_predict_time = time.perf_counter()
 # Preprocessing Training and Test Data sets
 scaler = StandardScaler() # function used for standardization
 
+# Standardizing training and test sets
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
@@ -124,6 +127,8 @@ baseline_randomForest.fit(X_train_scaled, y_train)
 # Baseline Random Forest Prediction
 baseline_prediction_train = baseline_randomForest.predict(X_train_scaled)
 baseline_prediction_test = baseline_randomForest.predict(X_test_scaled)
+
+# Displaying Accuracy and F1 scores on both raw training and test sets
 print(f"Baseline Random Forests training set (all {X_train_scaled.shape[1]} features): {accuracy_score(y_train, baseline_prediction_train):.4f}")
 print(f"Baseline Random Forests test set (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction_test):.4f}")
 print(f"Baseline Random Forests - Accuracy {accuracy_score(y_test, baseline_prediction_test):.4f} |"
@@ -133,26 +138,31 @@ top_Features = SelectFromModel(baseline_randomForest, threshold='median', prefit
 X_train_selected = top_Features.transform(X_train_scaled)
 X_test_selected = top_Features.transform(X_test_scaled)
 
+# Defining prediction method with selected hyperparameters
 randomForest_selected = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
 randomForest_selected.fit(X_train_selected, y_train)
 
-#Evaluate on Unseen Subjects
+# Evaluate and Predict on Unseen (test) Subjects
 Y_Prediction = randomForest_selected.predict(X_test_selected)
 
+# Displaying Accuracy and F1 Scores 
 print(f"Selected Random Forests - Accuracy {accuracy_score(y_test, Y_Prediction):.4f} |"
       f"macro-F1 {f1_score(y_test, Y_Prediction, average='macro'):.4f}")
 
+# Displaying F1 Scores side by side for readability
 per_class_f1_score = f1_score(y_test, Y_Prediction, average=None, labels=sorted(y_test.unique()))
 print("Per-class F1:", {k: round (float(v), 3) for k, v in  zip(sorted(y_test.unique()), per_class_f1_score.round(3))})
 
 test_evaluation = test_dataframe[['Subject', 'Activity']].copy()
 test_evaluation['pred'] = Y_Prediction
 
+# Header
 print("\n" + "="*60)
-print("Per- Participant Test Performance (Random Forest, selected model)")
+print("Per - Participant Test Performance (Random Forest, selected model)")
 print("="*60)
 print(f"{'Subject':>8} {'n_samples':>10} {'accuracy':>10} {'macro_F1':>10}")
 
+# Showing accuracy and F1 scores for the selected subjects based on test set.
 per_subject_rows =[]
 for subject, group in test_evaluation.groupby('Subject'):
     accuracy = (group['Activity'] == group['pred']).mean()
@@ -161,7 +171,7 @@ for subject, group in test_evaluation.groupby('Subject'):
     per_subject_rows.append((subject, len(group), accuracy, f1))
     print(f"{subject:>8} {len(group):>10} {accuracy:>10.4f}, {f1:>10.4f}")
 
-
+# Showing each subject data with given constraints
 per_subject_difference = pd.DataFrame(per_subject_rows, columns=['Subject', 'n_samples', 'accuracy','macro_F1'])
 print("-"*60)
 print(f" {'mean':>8} {'':>10} {per_subject_difference['accuracy'].mean():>10.4f} {per_subject_difference['macro_F1'].mean():>10.4f}")
@@ -169,6 +179,7 @@ print(f" {'std':>8} {'':>10} {per_subject_difference['accuracy'].std():>10.4f} {
 print(f" {'min':>8} {'':>10} {per_subject_difference['accuracy'].min():>10.4f} {per_subject_difference['macro_F1'].min():>10.4f}")
 print(f" {'max':>8} {'':>10} {per_subject_difference['accuracy'].max():>10.4f} {per_subject_difference['macro_F1'].max():>10.4f}")
 
+# Calculating the spread between worst and best subject
 worst = per_subject_difference.loc[per_subject_difference['accuracy'].idxmin()]
 best  = per_subject_difference.loc[per_subject_difference['accuracy'].idxmax()]
 print(f"\n  Worst participant: subject {int(worst['Subject'])} (acc {worst['accuracy']:.4f})")
