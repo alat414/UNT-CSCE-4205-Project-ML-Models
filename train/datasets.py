@@ -28,7 +28,6 @@ def get_hardware_info():
         "ram_total_gb": round(psutil.virtual_memory().total / (1024**3), 2),
         "gpu": "None"
     }
-    
     return info
 
 # Gather hardware specifications prior to training
