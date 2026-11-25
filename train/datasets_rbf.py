@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import time
 import platform
 import psutil
+import winreg
 import joblib
 from pathlib import Path
 from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
@@ -34,6 +35,10 @@ def get_hardware_info():
     return info
 
 # Gather hardware specifications prior to training
+key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                     r"HARDWARE\DESCRIPTION\System\CentralProcessor\0")
+cpu_name, _ = winreg.QueryValueEx(key, "ProcessorNameString")
+print(f"{cpu_name, _  }")
 hardware = get_hardware_info()
 print(f"Hardware Specifications")
 print("*" * 20)
