@@ -142,6 +142,9 @@ Y_Prediction = randomForest_selected.predict(X_test_selected)
 print(f"Selected Random Forests - Accuracy {accuracy_score(y_test, Y_Prediction):.4f} |"
       f"macro-F1 {f1_score(y_test, Y_Prediction, average='macro'):.4f}")
 
+per_class_f1_score = f1_score(y_test, Y_Prediction, average=None, labels=sorted(y_test.unique()))
+print("Per-class F1:", dict(zip(sorted(y_test.unique()), per_class_f1_score.round(3))))
+
 print("\n" + "="*60)
 print("Evaluation on Top Subjects")
 print("="*60)
