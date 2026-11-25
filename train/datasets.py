@@ -186,6 +186,7 @@ print(f"\n  Worst participant: subject {int(worst['Subject'])} (acc {worst['accu
 print(f"  Best  participant: subject {int(best['Subject'])}  (acc {best['accuracy']:.4f})")
 print(f"  Spread (max-min):  {best['accuracy'] - worst['accuracy']:.4f}")
 
+# Displaying more detail results including classification report
 print("\n" + "="*60)
 print("Evaluation on Top Subjects")
 print("="*60)
