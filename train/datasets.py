@@ -157,12 +157,12 @@ per_subject_rows =[]
 for subject, group in test_evaluation.groupby('Subject'):
     accuracy = (group['Activity'] == group['pred']).mean()
     # Ensuring the subjects have a Macro F1 score of at least 1. 
-    f1 = f1_score(group['Average'], group['pred'], average='macro', zero_division=0)
+    f1 = f1_score(group['Activity'], group['pred'], average='macro', zero_division=0)
     per_subject_rows.append((subject, len(group), accuracy, f1))
     print(f"{subject:>8} {len(group):>10} {accuracy:>10.4f}, {f1:>10.4f}")
 
 
-per_subject_difference = pd.Dataframe(per_subject_rows, columns=['Subject' 'n_samples' 'accuracy''macro_F1'])
+per_subject_difference = pd.DataFrame(per_subject_rows, columns=['Subject', 'n_samples', 'accuracy','macro_F1'])
 print("-"*60)
 print(f" {'mean':>8} {'':>10} {per_subject_difference['accuracy'].mean():>10.4f} {per_subject_difference['macro_F1'].mean():>10.4f}")
 print(f" {'std':>8} {'':>10} {per_subject_difference['accuracy'].std():>10.4f} {per_subject_difference['macro_F1'].std():>10.4f}")
