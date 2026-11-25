@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay, f1_score
 from sklearn.preprocessing import StandardScaler
 # Path Setup
 
@@ -126,6 +126,8 @@ baseline_prediction_train = baseline_randomForest.predict(X_train_scaled)
 baseline_prediction_test = baseline_randomForest.predict(X_test_scaled)
 print(f"Baseline Random Forests training set (all {X_train_scaled.shape[1]} features): {accuracy_score(y_train, baseline_prediction_train):.4f}")
 print(f"Baseline Random Forests test set (all {X_train_scaled.shape[1]} features): {accuracy_score(y_test, baseline_prediction_test):.4f}")
+print(f"Baseline Random Forests - Accuracy {accuracy_score(y_test, baseline_prediction_test):.4f} |"
+      f"macro-F1 {f1_score(y_test, baseline_prediction_test, average='macro'):.4f}")
 
 top_Features = SelectFromModel(baseline_randomForest, threshold='median', prefit=True) # Median retains the top half total engineered features
 X_train_selected = top_Features.transform(X_train_scaled)
@@ -136,6 +138,9 @@ randomForest_selected.fit(X_train_selected, y_train)
 
 #Evaluate on Unseen Subjects
 Y_Prediction = randomForest_selected.predict(X_test_selected)
+
+print(f"Selected Random Forests - Accuracy {accuracy_score(y_test, Y_Prediction):.4f} |"
+      f"macro-F1 {f1_score(y_test, Y_Prediction, average='macro'):.4f}")
 
 print("\n" + "="*60)
 print("Evaluation on Top Subjects")
