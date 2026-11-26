@@ -116,6 +116,7 @@ scaler = StandardScaler() # function used for standardization
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
+# Defining method with selected hyperparameters
 baseline_randomForest = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
 baseline_randomForest.fit(X_train_scaled, y_train)
 
