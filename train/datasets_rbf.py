@@ -133,7 +133,7 @@ print(classification_report(y_test, svm_test_pred))
 print(f"RBF SVM Test  — Accuracy {accuracy_score(y_test, svm_test_pred):.4f} | "
       f"macro-F1 {f1_score(y_test, svm_test_pred, average='macro'):.4f}")
 
-# --- Per-class F1 (test set) ---
+# Per-class F1 (test set)
 per_class_f1 = f1_score(y_test, svm_test_pred, average=None,
                         labels=sorted(y_test.unique()))
 print("Per-class F1:", {k: round(float(v), 3)
@@ -141,7 +141,7 @@ print("Per-class F1:", {k: round(float(v), 3)
 
 # Get final prediction time 
 final_predict_time = time.perf_counter() - start_predict_time
-print(f"Predicton time: {final_predict_time:.4f} seconds")
+print(f"Prediction time: {final_predict_time:.4f} seconds")
 
 # Showing all subject test performance (RBF SVM)
 test_eval_svm = test_dataframe[['Subject', 'Activity']].copy()
